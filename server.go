@@ -16,9 +16,15 @@ const (
 	ServerPort = ":8080"
 )
 
-func serve_snek() error {
-	endpoint := NewEndpoint()
+type Snek_Server struct {
+	endpoint Endpoint
+	game     Game
+	players  []string
+}
 
+func (server *Snek_Server) serve_snek() error {
+	endpoint := NewEndpoint()
+	server.endpoint = *endpoint
 	endpoint.AddHandler("JOIN", handleJoin)
 	endpoint.AddHandler("KEY", handleKey)
 	endpoint.AddHandler("SYNC", handleSync)
@@ -124,4 +130,26 @@ func handleKey(rw *bufio.ReadWriter) {
 	var keyPress termbox.Event
 	dec := gob.NewDecoder(rw)
 	err := dec.Decode(&keyPress)
+	if err != nil {
+		log.Println("unable to decode keypress")
+		return
+	}
+
+	switch event.Type {
+	case termbox.EventKey:
+		if event.Key == termbox.KeyArrowUp && s.Dir != "D" {
+			s.Dir = "U"
+		}
+		if event.Key == termbox.KeyArrowDown && s.Dir != "U" {
+			s.Dir = "D"
+		}
+		if event.Key == termbox.KeyArrowLeft && s.Dir != "R" {
+			s.Dir = "L"
+		}
+		if event.Key == termbox.KeyArrowRight && s.Dir != "L" {
+			s.Dir = "R"
+		}
+	default:
+		return
+	}
 }

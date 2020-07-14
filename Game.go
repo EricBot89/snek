@@ -6,7 +6,7 @@ import (
 )
 
 type Game struct {
-	Sneks []Snek
+	Sneks map[string]Snek
 	b     Board
 }
 
