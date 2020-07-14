@@ -18,7 +18,7 @@ const (
 
 type Snek_Server struct {
 	endpoint Endpoint
-	game     Game
+	Game     Game
 	players  []string
 }
 
@@ -116,6 +116,8 @@ func handleJoin(rw *bufio.ReadWriter) {
 }
 
 func handleSync(rw *bufio.ReadWriter) {
+	enc := gob.NewEncoder(rw)
+	err := enc.encode()
 	_, writeErr := rw.WriteString("All Good\n")
 	if writeErr != nil {
 		log.Println("Failed to write to steam", writeErr)
@@ -135,18 +137,18 @@ func handleKey(rw *bufio.ReadWriter) {
 		return
 	}
 
-	switch event.Type {
+	switch keyPress.Type {
 	case termbox.EventKey:
-		if event.Key == termbox.KeyArrowUp && s.Dir != "D" {
+		if keyPress.Key == termbox.KeyArrowUp && s.Dir != "D" {
 			s.Dir = "U"
 		}
-		if event.Key == termbox.KeyArrowDown && s.Dir != "U" {
+		if keyPress.Key == termbox.KeyArrowDown && s.Dir != "U" {
 			s.Dir = "D"
 		}
-		if event.Key == termbox.KeyArrowLeft && s.Dir != "R" {
+		if keyPress.Key == termbox.KeyArrowLeft && s.Dir != "R" {
 			s.Dir = "L"
 		}
-		if event.Key == termbox.KeyArrowRight && s.Dir != "L" {
+		if keyPress.Key == termbox.KeyArrowRight && s.Dir != "L" {
 			s.Dir = "R"
 		}
 	default:

@@ -2,12 +2,15 @@ package main
 
 import (
 	"math/rand"
+	"sync"
 	"time"
 )
 
 type Game struct {
 	Sneks map[string]Snek
 	b     Board
+
+	m sync.RWMutex
 }
 
 func NewGame() Game {
@@ -64,18 +67,22 @@ func (g *Game) check_food() {
 	}
 }
 
-func check_loss(s *Snek) bool {
-	for _, cell := range s.Tail {
-		if s.Head[0] == cell[0] && s.Head[1] == cell[1] {
-			return true
+func (g *Game) check_loss() []string {
+	var lost []string
+	for name, s := range g.Sneks {
+		for _, cell := range s.Tail {
+			if s.Head[0] == cell[0] && s.Head[1] == cell[1] {
+				lost = append(lost, name)
+			}
 		}
 	}
-	return false
+	return lost
 }
 
 func run_snek() {
 	g := NewGame()
 	for {
 		g.game_tick()
+		time.Sleep(101 * time.Millisecond)
 	}
 }
