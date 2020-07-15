@@ -2,20 +2,18 @@ package main
 
 import (
 	"math/rand"
-	"sync"
 	"time"
 )
 
 type Game struct {
 	Sneks map[string]Snek
 	b     Board
-
-	m sync.RWMutex
 }
 
 func NewGame() Game {
 	g := Game{
-		b: NewBoard(),
+		b:     NewBoard(),
+		Sneks: map[string]Snek{},
 	}
 	g.b.add_food()
 	g.b.add_food()

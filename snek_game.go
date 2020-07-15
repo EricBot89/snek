@@ -10,24 +10,28 @@ const title = "SNEK"
 func main() {
 	serve := flag.Bool("serve", false, "flag to set server mode")
 	connect := flag.Bool("c", false, "connect to a snek server")
-	ip := flag.String("ip", "", "ip of multi-snek server to connect to")
+	ip := flag.String("ip", "127.0.0.1", "ip of multi-snek server to connect to or create")
+	port := flag.String("port", ":8080", "port to connect on")
+	name := flag.String("name", "dorkus", "name to join snek as")
 	flag.Parse()
 
 	server := *serve
 
 	multiplayer := *connect
-	server_ip := *ip
 
 	if server {
-		serverErr := serve_snek()
+		s := NewServer(*port)
+		serverErr := s.serve_snek()
 		if serverErr != nil {
 			log.Println("Error:", serverErr)
 		}
 	}
 
 	if multiplayer {
-		log.Println("should connect on", server_ip)
-		clientErr := joinServer(server_ip)
+		log.Println("should connect on", *ip)
+		c := NewClient(*name, *ip, *port)
+		clientErr := c.join_server()
+		c.request_game()
 		if clientErr != nil {
 			log.Println("Error:", clientErr)
 		}

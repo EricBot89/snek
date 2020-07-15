@@ -2,6 +2,8 @@ package main
 
 import (
 	"bufio"
+	"encoding/gob"
+	"fmt"
 	"log"
 	"net"
 	"time"
@@ -18,6 +20,14 @@ type Snek_Client struct {
 	ip   string
 	port string
 	game Game
+}
+
+func NewClient(name string, ip string, port string) Snek_Client {
+	return Snek_Client{
+		name: name,
+		ip:   ip,
+		port: port,
+	}
 }
 
 func (client *Snek_Client) join_server() error {
@@ -65,24 +75,20 @@ func (client *Snek_Client) send_key(key termbox.Event) error {
 		log.Println("Failed to write to stream", writeErr)
 		return writeErr
 	}
-
+	enc := gob.NewEncoder(rw)
+	err := enc.Encode(key)
+	if err != nil {
+		log.Println("Failed to encode termbox event")
+	}
 	flushErr := rw.Flush()
 	if flushErr != nil {
 		log.Println("Failed to flush", flushErr)
 		return flushErr
 	}
-	response, readErr := rw.ReadString('\n')
-	if readErr != nil {
-		log.Println("Failed to read response", readErr)
-		return readErr
-	}
-
-	log.Println("Read Response" + response)
-
 	return nil
 }
 
-func (client *Snek_Client) requestGame() error {
+func (client *Snek_Client) request_game() error {
 	rw, openErr := Open(client.ip + client.port)
 	if openErr != nil {
 		log.Println("Failed to connect", openErr)
@@ -99,14 +105,14 @@ func (client *Snek_Client) requestGame() error {
 		log.Println("Failed to flush", flushErr)
 		return flushErr
 	}
-	response, readErr := rw.ReadString('\n')
-	if readErr != nil {
-		log.Println("Failed to read response", readErr)
-		return readErr
+	var game Game
+	dec := gob.NewDecoder(rw)
+	err := dec.Decode(&game)
+	if err != nil {
+		log.Println("Failed to sync game")
 	}
-
-	log.Println("Read Response" + response)
-
+	client.game = game
+	fmt.Println(game)
 	return nil
 }
 
@@ -149,7 +155,8 @@ loop:
 			}
 
 		default:
-			client.requestGame()
+			client.request_game()
+			draw(&client.game)
 			time.Sleep(5 * time.Millisecond)
 		}
 	}

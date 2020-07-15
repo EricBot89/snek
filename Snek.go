@@ -9,6 +9,14 @@ type Snek struct {
 	Dead bool
 }
 
+func NewSnek() Snek {
+	return Snek{
+		Head: [2]int{3, 3},
+		Len:  1,
+		Dir:  "R",
+	}
+}
+
 func (s *Snek) eat_food() {
 	s.Len++
 }
