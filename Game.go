@@ -35,7 +35,8 @@ func (g *Game) game_tick() {
 }
 
 func (g *Game) move_sneks() {
-	for _, s := range g.Sneks {
+	for name, _ := range g.Sneks {
+		s := g.Sneks[name]
 		s.Tail = append(s.Tail, s.Head)
 		if len(s.Tail) > s.Len {
 			s.Tail = s.Tail[1 : s.Len+1]
@@ -50,6 +51,7 @@ func (g *Game) move_sneks() {
 		case "R":
 			s.Head[0] = (s.Head[0] + 1) % g.b.Width
 		}
+		g.Sneks[name] = s
 	}
 
 }

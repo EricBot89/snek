@@ -74,6 +74,11 @@ func (client *Snek_Client) send_key(key termbox.Event) error {
 		log.Println("Failed to write to stream", writeErr)
 		return writeErr
 	}
+	_, writeErr = rw.WriteString(client.name + "\n")
+	if writeErr != nil {
+		log.Println("Failed to write to stream", writeErr)
+		return writeErr
+	}
 	enc := gob.NewEncoder(rw)
 	err := enc.Encode(key)
 	if err != nil {
