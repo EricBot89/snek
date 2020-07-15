@@ -31,9 +31,9 @@ func main() {
 		log.Println("should connect on", *ip)
 		c := NewClient(*name, *ip, *port)
 		clientErr := c.join_server()
-		c.request_game()
 		if clientErr != nil {
 			log.Println("Error:", clientErr)
 		}
+		c.play_snek()
 	}
 }

@@ -18,7 +18,7 @@ const (
 
 type Snek_Server struct {
 	endpoint Endpoint
-	game     Game
+	game     *Game
 	players  []string
 	port     string
 }
@@ -30,13 +30,14 @@ func NewServer(port string) Snek_Server {
 func (server *Snek_Server) serve_snek() error {
 
 	game := NewGame()
-	server.game = game
+	server.game = &game
 	endpoint := NewEndpoint()
 	server.endpoint = *endpoint
 	endpoint.AddHandler("JOIN", handleJoin)
 	endpoint.AddHandler("KEY", handleKey)
 	endpoint.AddHandler("SYNC", handleSync)
-	return endpoint.Listen(&server.game, server.port)
+	go server.game.run_snek()
+	return endpoint.Listen(server.game, server.port)
 }
 
 type Handler func(*bufio.ReadWriter, *Game)

@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"encoding/gob"
-	"fmt"
 	"log"
 	"net"
 	"time"
@@ -112,12 +111,10 @@ func (client *Snek_Client) request_game() error {
 		log.Println("Failed to sync game")
 	}
 	client.game = game
-	fmt.Println(game)
 	return nil
 }
 
 func Open(addr string) (*bufio.ReadWriter, error) {
-	log.Println("opening connection to snek server at", addr)
 	conn, err := net.Dial("tcp", addr) //Look into UDP for this application, TCP might not be the best choice
 	if err != nil {
 		return nil, err

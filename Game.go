@@ -77,8 +77,7 @@ func (g *Game) check_loss() []string {
 	return lost
 }
 
-func run_snek() {
-	g := NewGame()
+func (g *Game) run_snek() {
 	for {
 		g.game_tick()
 		time.Sleep(101 * time.Millisecond)
