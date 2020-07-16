@@ -29,14 +29,14 @@ func NewGameData(g *Game) GameData {
 	}
 }
 
-func NewGame() Game {
+func NewGame() *Game {
 	g := Game{
 		B:     NewBoard(),
 		Sneks: map[string]Snek{},
 	}
 	g.B.add_food()
 	g.B.add_food()
-	return g
+	return &g
 }
 
 func (g *Game) game_tick() {

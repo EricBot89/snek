@@ -22,7 +22,7 @@ func NewServer(port string) Snek_Server {
 func (server *Snek_Server) serve_snek() error {
 
 	game := NewGame()
-	server.game = &game
+	server.game = game
 	endpoint := NewEndpoint()
 	server.endpoint = endpoint
 	endpoint.AddHandler("JOIN", handleJoin)
