@@ -79,11 +79,22 @@ func handleJoin(rw *bufio.ReadWriter, game *Game) {
 		log.Println("Failed to read string from stream", readErr)
 	}
 	name = strings.Trim(name, "\n ")
+	if _, joined := game.Sneks[name]; joined {
+		_, writeErr := rw.WriteString("Player with that name already joined\n")
+		if writeErr != nil {
+			log.Println("Failed to write to steam", writeErr)
+		}
+		flushErr := rw.Flush()
+		if flushErr != nil {
+			log.Println("Flush failed.", flushErr)
+		}
+		return
+	}
 	log.Println(name + "Joined Snek")
 	game.m.Lock()
 	game.Sneks[name] = NewSnek()
 	game.m.Unlock()
-	_, writeErr := rw.WriteString("All Good\n")
+	_, writeErr := rw.WriteString("JOINED\n")
 	if writeErr != nil {
 		log.Println("Failed to write to steam", writeErr)
 	}
@@ -144,5 +155,25 @@ func handleKey(rw *bufio.ReadWriter, game *Game) {
 		game.m.Unlock()
 	default:
 		return
+	}
+}
+
+func handleQuit(rw *bufio.ReadWriter, game *Game) {
+	name, readErr := rw.ReadString('\n')
+	if readErr != nil {
+		log.Println("Failed to read player name from stream", readErr)
+	}
+	name = strings.Trim(name, "\n")
+	log.Print(name + " Quit the Game")
+	game.m.Lock()
+	delete(game.Sneks, name)
+	game.m.Unlock()
+	_, writeErr := rw.WriteString("QUIT\n")
+	if writeErr != nil {
+		log.Println("Failed to write to steam", writeErr)
+	}
+	flushErr := rw.Flush()
+	if flushErr != nil {
+		log.Println("Flush failed.", flushErr)
 	}
 }

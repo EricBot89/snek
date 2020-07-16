@@ -33,6 +33,7 @@ func main() {
 		clientErr := c.join_server()
 		if clientErr != nil {
 			log.Println("Error:", clientErr)
+			return
 		}
 		c.play_snek()
 	}

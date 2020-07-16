@@ -3,8 +3,10 @@ package main
 import (
 	"bufio"
 	"encoding/gob"
+	"errors"
 	"log"
 	"net"
+	"strings"
 	"time"
 
 	"github.com/nsf/termbox-go"
@@ -56,10 +58,11 @@ func (client *Snek_Client) join_server() error {
 		log.Println("Failed to read response", readErr)
 		return readErr
 	}
-
-	log.Println("Read Response" + response)
-
-	return nil
+	response = strings.Trim(response, "\n")
+	if response == "JOINED" {
+		return nil
+	}
+	return errors.New("Player already joined with that name")
 }
 
 func (client *Snek_Client) send_key(key termbox.Event) error {
@@ -119,6 +122,33 @@ func (client *Snek_Client) request_game() error {
 	return nil
 }
 
+func (client *Snek_Client) quit_game() error {
+	rw, openErr := Open(client.ip + client.port)
+	if openErr != nil {
+		log.Println("Failed to connect", openErr)
+		return openErr
+	}
+
+	_, writeErr := rw.WriteString("QUIT\n")
+	if writeErr != nil {
+		log.Println("Failed to write to stream", writeErr)
+		return writeErr
+	}
+
+	_, writeErr = rw.WriteString(client.name + "\n")
+	if writeErr != nil {
+		log.Println("Failed to write to stream", writeErr)
+		return writeErr
+	}
+
+	flushErr := rw.Flush()
+	if flushErr != nil {
+		log.Println("Failed to flush", flushErr)
+		return flushErr
+	}
+	return nil
+}
+
 func Open(addr string) (*bufio.ReadWriter, error) {
 	conn, err := net.Dial("tcp", addr) //Look into UDP for this application, TCP might not be the best choice
 	if err != nil {
@@ -149,6 +179,7 @@ loop:
 			switch event.Type {
 			case termbox.EventKey:
 				if event.Key == termbox.KeyCtrlQ {
+					client.quit_game()
 					break loop
 				}
 				client.send_key(event)
