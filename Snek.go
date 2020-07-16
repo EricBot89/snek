@@ -14,6 +14,7 @@ func NewSnek() Snek {
 		Head: [2]int{3, 3},
 		Len:  1,
 		Dir:  "R",
+		Dead: false,
 	}
 }
 

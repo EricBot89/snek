@@ -90,16 +90,16 @@ func (g *Game) check_food() {
 	}
 }
 
-func (g *Game) check_loss() []string {
-	var lost []string
+func (g *Game) check_loss() {
 	for name, s := range g.Sneks {
 		for _, cell := range s.Tail {
 			if s.Head[0] == cell[0] && s.Head[1] == cell[1] {
-				lost = append(lost, name)
+				s := g.Sneks[name]
+				s.Dead = true
+				g.Sneks[name] = s
 			}
 		}
 	}
-	return lost
 }
 
 func (g *Game) run_snek() {

@@ -107,10 +107,24 @@ func (client *Snek_Client) request_game() error {
 		log.Println("Failed to write to stream", writeErr)
 		return writeErr
 	}
+	_, writeErr = rw.WriteString(client.name + "\n")
+	if writeErr != nil {
+		log.Println("Failed to write to stream", writeErr)
+		return writeErr
+	}
 	flushErr := rw.Flush()
 	if flushErr != nil {
 		log.Println("Failed to flush", flushErr)
 		return flushErr
+	}
+	response, readErr := rw.ReadString('\n')
+	if readErr != nil {
+		log.Println("Failed to read response", readErr)
+		return readErr
+	}
+	response = strings.Trim(response, "\n")
+	if response == "DEAD" {
+		return errors.New("You are Dead")
 	}
 	var game GameData
 	dec := gob.NewDecoder(rw)
@@ -188,7 +202,11 @@ loop:
 			}
 
 		default:
-			client.request_game()
+			err := client.request_game()
+			if err != nil {
+				client.quit_game()
+				log.Println(err)
+			}
 			draw(&client.game)
 			time.Sleep(15 * time.Millisecond)
 		}

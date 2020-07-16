@@ -105,6 +105,22 @@ func handleJoin(rw *bufio.ReadWriter, game *Game) {
 }
 
 func handleSync(rw *bufio.ReadWriter, game *Game) {
+	name, readErr := rw.ReadString('\n')
+	if readErr != nil {
+		log.Println("Failed to read player name from stream", readErr)
+	}
+	name = strings.Trim(name, "\n")
+	if game.Sneks[name].Dead {
+		_, writeErr := rw.WriteString("DEAD\n")
+		if writeErr != nil {
+			log.Println("Failed to write to steam", writeErr)
+		}
+		return
+	}
+	_, writeErr := rw.WriteString("NOT DEAD\n")
+	if writeErr != nil {
+		log.Println("Failed to write to steam", writeErr)
+	}
 	game.m.RLock()
 	g := NewGameData(game)
 	game.m.RUnlock()
@@ -126,8 +142,8 @@ func handleKey(rw *bufio.ReadWriter, game *Game) {
 	if readErr != nil {
 		log.Println("Failed to read player name from stream", readErr)
 	}
-	log.Print(name + " Moved Snek")
 	name = strings.Trim(name, "\n")
+	log.Print(name + " Moved Snek")
 	dec := gob.NewDecoder(rw)
 	err := dec.Decode(&keyPress)
 	if err != nil {
