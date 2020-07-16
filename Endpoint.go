@@ -56,7 +56,6 @@ func (e *Endpoint) handleTCP(conn net.Conn, game *Game) {
 		cmd, err := rw.ReadString('\n')
 		if err != nil {
 			if err == io.EOF {
-				log.Println("EOF reached, done reading successfully")
 				return
 			}
 			log.Println("Something fucked up", err)
@@ -80,7 +79,7 @@ func handleJoin(rw *bufio.ReadWriter, game *Game) {
 		log.Println("Failed to read string from stream", readErr)
 	}
 	name = strings.Trim(name, "\n ")
-	log.Println(name)
+	log.Println(name + "Joined Snek")
 	game.m.Lock()
 	game.Sneks[name] = NewSnek()
 	game.m.Unlock()
@@ -114,8 +113,9 @@ func handleKey(rw *bufio.ReadWriter, game *Game) {
 
 	name, readErr := rw.ReadString('\n')
 	if readErr != nil {
-		log.Println("Failed to read string from stream", readErr)
+		log.Println("Failed to read player name from stream", readErr)
 	}
+	log.Print(name + " Moved Snek")
 	name = strings.Trim(name, "\n")
 	dec := gob.NewDecoder(rw)
 	err := dec.Decode(&keyPress)

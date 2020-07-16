@@ -56,7 +56,8 @@ func (g *Game) game_tick() {
 }
 
 func (g *Game) move_sneks() {
-	for _, s := range g.Sneks {
+	for name, _ := range g.Sneks {
+		s := g.Sneks[name]
 		s.Tail = append(s.Tail, s.Head)
 		if len(s.Tail) > s.Len {
 			s.Tail = s.Tail[1 : s.Len+1]
@@ -71,16 +72,19 @@ func (g *Game) move_sneks() {
 		case "R":
 			s.Head[0] = (s.Head[0] + 1) % g.B.Width
 		}
+		g.Sneks[name] = s
 	}
 
 }
 
 func (g *Game) check_food() {
-	for _, s := range g.Sneks {
+	for name, s := range g.Sneks {
 		for f_idx, cell := range g.B.Food {
 			if s.Head[0] == cell[0] && s.Head[1] == cell[1] {
+				s = g.Sneks[name]
 				s.eat_food()
 				g.B.remove_food(f_idx)
+				g.Sneks[name] = s
 			}
 		}
 	}
@@ -101,6 +105,6 @@ func (g *Game) check_loss() []string {
 func (g *Game) run_snek() {
 	for {
 		g.game_tick()
-		time.Sleep(101 * time.Millisecond)
+		time.Sleep(100 * time.Millisecond)
 	}
 }

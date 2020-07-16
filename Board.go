@@ -20,9 +20,9 @@ func NewBoard() Board {
 		Min_x:  0,
 		Min_y:  0,
 		Max_x:  50,
-		Max_y:  50,
+		Max_y:  25,
 		Width:  50,
-		Height: 50,
+		Height: 25,
 	}
 }
 

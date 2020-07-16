@@ -11,8 +11,8 @@ func main() {
 	serve := flag.Bool("serve", false, "flag to set server mode")
 	connect := flag.Bool("c", false, "connect to a snek server")
 	ip := flag.String("ip", "127.0.0.1", "ip of multi-snek server to connect to or create")
-	port := flag.String("port", ":8080", "port to connect on")
-	name := flag.String("name", "dorkus", "name to join snek as")
+	port := flag.String("p", ":8080", "port to connect on")
+	name := flag.String("n", "dorkus", "name to join snek as")
 	flag.Parse()
 
 	server := *serve
