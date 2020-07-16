@@ -2,21 +2,40 @@ package main
 
 import (
 	"math/rand"
+	"sync"
 	"time"
 )
 
 type Game struct {
 	Sneks map[string]Snek
-	b     Board
+	B     Board
+
+	m sync.RWMutex
+}
+
+type GameData struct {
+	Sneks []Snek
+	B     Board
+}
+
+func NewGameData(g *Game) GameData {
+	var sneks []Snek
+	for _, Snek := range g.Sneks {
+		sneks = append(sneks, Snek)
+	}
+	return GameData{
+		B:     g.B,
+		Sneks: sneks,
+	}
 }
 
 func NewGame() Game {
 	g := Game{
-		b:     NewBoard(),
+		B:     NewBoard(),
 		Sneks: map[string]Snek{},
 	}
-	g.b.add_food()
-	g.b.add_food()
+	g.B.add_food()
+	g.B.add_food()
 	return g
 }
 
@@ -24,44 +43,44 @@ func (g *Game) game_tick() {
 	seed := time.Now().UnixNano()
 	rand.Seed(seed)
 	p := rand.Intn(1000)
+	g.m.Lock()
 	if p < 5 {
-		g.b.add_food()
+		g.B.add_food()
 	}
-	if len(g.b.Food) > 8 {
-		g.b.Food = g.b.Food[1:]
+	if len(g.B.Food) > 8 {
+		g.B.Food = g.B.Food[1:]
 	}
 	g.move_sneks()
 	g.check_food()
+	g.m.Unlock()
 }
 
 func (g *Game) move_sneks() {
-	for name, _ := range g.Sneks {
-		s := g.Sneks[name]
+	for _, s := range g.Sneks {
 		s.Tail = append(s.Tail, s.Head)
 		if len(s.Tail) > s.Len {
 			s.Tail = s.Tail[1 : s.Len+1]
 		}
 		switch s.Dir {
 		case "U":
-			s.Head[1] = (s.Head[1] - 1 + g.b.Height) % g.b.Height
+			s.Head[1] = (s.Head[1] - 1 + g.B.Height) % g.B.Height
 		case "D":
-			s.Head[1] = (s.Head[1] + 1) % g.b.Height
+			s.Head[1] = (s.Head[1] + 1) % g.B.Height
 		case "L":
-			s.Head[0] = (s.Head[0] - 1 + g.b.Width) % g.b.Width
+			s.Head[0] = (s.Head[0] - 1 + g.B.Width) % g.B.Width
 		case "R":
-			s.Head[0] = (s.Head[0] + 1) % g.b.Width
+			s.Head[0] = (s.Head[0] + 1) % g.B.Width
 		}
-		g.Sneks[name] = s
 	}
 
 }
 
 func (g *Game) check_food() {
 	for _, s := range g.Sneks {
-		for f_idx, cell := range g.b.Food {
+		for f_idx, cell := range g.B.Food {
 			if s.Head[0] == cell[0] && s.Head[1] == cell[1] {
 				s.eat_food()
-				g.b.remove_food(f_idx)
+				g.B.remove_food(f_idx)
 			}
 		}
 	}

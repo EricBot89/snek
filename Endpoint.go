@@ -12,36 +12,6 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
-const (
-	ServerPort = ":8080"
-)
-
-type Snek_Server struct {
-	endpoint Endpoint
-	game     Game
-	players  []string
-	port     string
-}
-
-func NewServer(port string) Snek_Server {
-	return Snek_Server{port: port}
-}
-
-func (server *Snek_Server) serve_snek() error {
-
-	game := NewGame()
-	server.game = game
-	endpoint := NewEndpoint()
-	server.endpoint = *endpoint
-	endpoint.AddHandler("JOIN", handleJoin)
-	endpoint.AddHandler("KEY", handleKey)
-	endpoint.AddHandler("SYNC", handleSync)
-	go server.game.run_snek()
-	return server.endpoint.Listen(&server.game, server.port)
-}
-
-type Handler func(*bufio.ReadWriter, *Game)
-
 type Endpoint struct {
 	listner net.Listener
 	handler map[string]Handler
@@ -93,9 +63,6 @@ func (e *Endpoint) handleTCP(conn net.Conn, game *Game) {
 		}
 
 		cmd = strings.Trim(cmd, "\n ")
-
-		log.Println("Read Command " + cmd)
-
 		e.m.RLock()
 		handleCommand, ok := e.handler[cmd]
 		e.m.RUnlock()
@@ -114,7 +81,9 @@ func handleJoin(rw *bufio.ReadWriter, game *Game) {
 	}
 	name = strings.Trim(name, "\n ")
 	log.Println(name)
+	game.m.Lock()
 	game.Sneks[name] = NewSnek()
+	game.m.Unlock()
 	_, writeErr := rw.WriteString("All Good\n")
 	if writeErr != nil {
 		log.Println("Failed to write to steam", writeErr)
@@ -126,8 +95,11 @@ func handleJoin(rw *bufio.ReadWriter, game *Game) {
 }
 
 func handleSync(rw *bufio.ReadWriter, game *Game) {
+	game.m.RLock()
+	g := NewGameData(game)
+	game.m.RUnlock()
 	enc := gob.NewEncoder(rw)
-	err := enc.Encode(*game)
+	err := enc.Encode(g)
 	if err != nil {
 		log.Println("Failed to write to steam", err)
 	}
@@ -144,6 +116,7 @@ func handleKey(rw *bufio.ReadWriter, game *Game) {
 	if readErr != nil {
 		log.Println("Failed to read string from stream", readErr)
 	}
+	name = strings.Trim(name, "\n")
 	dec := gob.NewDecoder(rw)
 	err := dec.Decode(&keyPress)
 	if err != nil {
@@ -153,6 +126,7 @@ func handleKey(rw *bufio.ReadWriter, game *Game) {
 
 	switch keyPress.Type {
 	case termbox.EventKey:
+		game.m.Lock()
 		var s = game.Sneks[name]
 		if keyPress.Key == termbox.KeyArrowUp && s.Dir != "D" {
 			s.Dir = "U"
@@ -167,6 +141,7 @@ func handleKey(rw *bufio.ReadWriter, game *Game) {
 			s.Dir = "R"
 		}
 		game.Sneks[name] = s
+		game.m.Unlock()
 	default:
 		return
 	}

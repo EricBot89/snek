@@ -18,7 +18,7 @@ type Snek_Client struct {
 	name string
 	ip   string
 	port string
-	game Game
+	game GameData
 }
 
 func NewClient(name string, ip string, port string) Snek_Client {
@@ -109,7 +109,7 @@ func (client *Snek_Client) request_game() error {
 		log.Println("Failed to flush", flushErr)
 		return flushErr
 	}
-	var game Game
+	var game GameData
 	dec := gob.NewDecoder(rw)
 	err := dec.Decode(&game)
 	if err != nil {
@@ -159,7 +159,7 @@ loop:
 		default:
 			client.request_game()
 			draw(&client.game)
-			time.Sleep(5 * time.Millisecond)
+			time.Sleep(15 * time.Millisecond)
 		}
 	}
 }
