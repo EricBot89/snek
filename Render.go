@@ -55,7 +55,7 @@ func drawBoard(g *GameData, x int, y int) {
 			case j == 0 || j == g.B.Height+1:
 				char = 0x2591
 			}
-			termbox.SetCell(i+x-1, j+y-1, char, termbox.ColorBlack, termbox.ColorBlue|termbox.ColorRed)
+			termbox.SetCell(i+x-1, j+y-1, char, termbox.ColorBlack, termbox.ColorGreen|termbox.ColorBlack|termbox.ColorBlack)
 		}
 	}
 }
