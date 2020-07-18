@@ -5,7 +5,7 @@ Multiplayer snake over tcp written in go
 
 Building Snek:
 
-    go install https://github.com/EricBot89/snek
+    go get github.com/EricBot89/snek
 
 To start a server: 
 
