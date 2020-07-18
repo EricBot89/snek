@@ -3,7 +3,7 @@ Multiplayer snake over tcp written in go
 
 ## usage
 
-##Building Snek:
+Building Snek:
 
     go install https://github.com/EricBot89/snek
 
