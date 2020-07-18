@@ -99,7 +99,7 @@ func handleJoin(rw *bufio.ReadWriter, game *Game) {
 	}
 	log.Println(name + " Joined Snek")
 	game.m.Lock()
-	game.Sneks[name] = NewSnek()
+	game.Sneks[name] = NewSnek(name)
 	game.m.Unlock()
 	_, writeErr := rw.WriteString("JOINED\n")
 	if writeErr != nil {
@@ -165,20 +165,7 @@ func handleKey(rw *bufio.ReadWriter, game *Game) {
 	switch keyPress.Type {
 	case termbox.EventKey:
 		game.m.Lock()
-		var s = game.Sneks[name]
-		if keyPress.Key == termbox.KeyArrowUp && s.Dir != "D" {
-			s.Dir = "U"
-		}
-		if keyPress.Key == termbox.KeyArrowDown && s.Dir != "U" {
-			s.Dir = "D"
-		}
-		if keyPress.Key == termbox.KeyArrowLeft && s.Dir != "R" {
-			s.Dir = "L"
-		}
-		if keyPress.Key == termbox.KeyArrowRight && s.Dir != "L" {
-			s.Dir = "R"
-		}
-		game.Sneks[name] = s
+		game.Sneks[name].chSnek(keyPress)
 		game.m.Unlock()
 	default:
 		return

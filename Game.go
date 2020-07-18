@@ -24,8 +24,8 @@ type GameData struct {
 //NewGameData returns a struct for the wire
 func NewGameData(g *Game) GameData {
 	var sneks []Snek
-	for _, Snek := range g.Sneks {
-		sneks = append(sneks, *Snek)
+	for _, s := range g.Sneks {
+		sneks = append(sneks, *s)
 	}
 	return GameData{
 		B:     g.B,
