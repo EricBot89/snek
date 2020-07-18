@@ -23,6 +23,7 @@ func (server *SnekServer) serveSnek() error {
 	endpoint.AddHandler("KEY", handleKey)
 	endpoint.AddHandler("SYNC", handleSync)
 	endpoint.AddHandler("QUIT", handleQuit)
+	endpoint.AddHandler("", handleDC)
 	go server.game.runSnek()
 	return server.endpoint.Listen(server.game, server.port)
 }

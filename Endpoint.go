@@ -65,7 +65,7 @@ func (e *Endpoint) handleTCP(conn net.Conn, game *Game) {
 			if err == io.EOF {
 				return
 			}
-			log.Println("Something fucked up", err)
+			log.Println(err)
 		}
 
 		cmd = strings.Trim(cmd, "\n ")
@@ -97,7 +97,7 @@ func handleJoin(rw *bufio.ReadWriter, game *Game) {
 		}
 		return
 	}
-	log.Println(name + "Joined Snek")
+	log.Println(name + " Joined Snek")
 	game.m.Lock()
 	game.Sneks[name] = NewSnek()
 	game.m.Unlock()
@@ -203,4 +203,8 @@ func handleQuit(rw *bufio.ReadWriter, game *Game) {
 	if flushErr != nil {
 		log.Println("Flush failed.", flushErr)
 	}
+}
+
+func handleDC(rw *bufio.ReadWriter, game *Game) {
+	log.Println("client disconnected")
 }
