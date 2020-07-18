@@ -1,25 +1,19 @@
 package main
 
-import (
-	"bufio"
-)
-
-const (
-	ServerPort = ":8080"
-)
-
-type Snek_Server struct {
+//SnekServer struct for a snek server
+type SnekServer struct {
 	endpoint *Endpoint
 	game     *Game
 	players  []string
 	port     string
 }
 
-func NewServer(port string) Snek_Server {
-	return Snek_Server{port: port}
+//NewServer starts a snek server on a port
+func NewServer(port string) SnekServer {
+	return SnekServer{port: port}
 }
 
-func (server *Snek_Server) serve_snek() error {
+func (server *SnekServer) serveSnek() error {
 
 	game := NewGame()
 	server.game = game
@@ -29,8 +23,6 @@ func (server *Snek_Server) serve_snek() error {
 	endpoint.AddHandler("KEY", handleKey)
 	endpoint.AddHandler("SYNC", handleSync)
 	endpoint.AddHandler("QUIT", handleQuit)
-	go server.game.run_snek()
+	go server.game.runSnek()
 	return server.endpoint.Listen(server.game, server.port)
 }
-
-type Handler func(*bufio.ReadWriter, *Game)

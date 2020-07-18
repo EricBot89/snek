@@ -1,5 +1,6 @@
 package main
 
+//Snek its a snek
 type Snek struct {
 	Head [2]int
 	Tail [][2]int
@@ -9,6 +10,7 @@ type Snek struct {
 	Dead bool
 }
 
+//NewSnek makes a new snek
 func NewSnek() Snek {
 	return Snek{
 		Head: [2]int{3, 3},
@@ -18,6 +20,6 @@ func NewSnek() Snek {
 	}
 }
 
-func (s *Snek) eat_food() {
+func (s *Snek) eatFood() {
 	s.Len++
 }

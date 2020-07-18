@@ -12,26 +12,24 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
-const (
-	ClientPort = ":8080"
-)
-
-type Snek_Client struct {
+//SnekClient client struct
+type SnekClient struct {
 	name string
 	ip   string
 	port string
 	game GameData
 }
 
-func NewClient(name string, ip string, port string) Snek_Client {
-	return Snek_Client{
+//NewClient client constructor
+func NewClient(name string, ip string, port string) SnekClient {
+	return SnekClient{
 		name: name,
 		ip:   ip,
 		port: port,
 	}
 }
 
-func (client *Snek_Client) join_server() error {
+func (client *SnekClient) joinServer() error {
 	rw, openErr := Open(client.ip + client.port)
 	if openErr != nil {
 		log.Println("Failed to connect", openErr)
@@ -65,7 +63,7 @@ func (client *Snek_Client) join_server() error {
 	return errors.New("Player already joined with that name")
 }
 
-func (client *Snek_Client) send_key(key termbox.Event) error {
+func (client *SnekClient) sendKey(key termbox.Event) error {
 	rw, openErr := Open(client.ip + client.port)
 	if openErr != nil {
 		log.Println("Failed to connect", openErr)
@@ -95,7 +93,7 @@ func (client *Snek_Client) send_key(key termbox.Event) error {
 	return nil
 }
 
-func (client *Snek_Client) request_game() error {
+func (client *SnekClient) requestGame() error {
 	rw, openErr := Open(client.ip + client.port)
 	if openErr != nil {
 		log.Println("Failed to connect", openErr)
@@ -136,7 +134,7 @@ func (client *Snek_Client) request_game() error {
 	return nil
 }
 
-func (client *Snek_Client) quit_game() error {
+func (client *SnekClient) quitGame() error {
 	rw, openErr := Open(client.ip + client.port)
 	if openErr != nil {
 		log.Println("Failed to connect", openErr)
@@ -163,15 +161,16 @@ func (client *Snek_Client) quit_game() error {
 	return nil
 }
 
+//Open a tcp connection to snek server
 func Open(addr string) (*bufio.ReadWriter, error) {
-	conn, err := net.Dial("tcp", addr) //Look into UDP for this application, TCP might not be the best choice
+	conn, err := net.Dial("tcp", addr)
 	if err != nil {
 		return nil, err
 	}
 	return bufio.NewReadWriter(bufio.NewReader(conn), bufio.NewWriter(conn)), nil
 }
 
-func (client *Snek_Client) play_snek() {
+func (client *SnekClient) playSnek() {
 	err := termbox.Init()
 
 	termbox.Clear(termbox.ColorWhite, termbox.ColorBlack)
@@ -193,22 +192,36 @@ loop:
 			switch event.Type {
 			case termbox.EventKey:
 				if event.Key == termbox.KeyCtrlQ {
-					client.quit_game()
+					client.quitGame()
 					break loop
 				}
-				client.send_key(event)
+				client.sendKey(event)
 			case termbox.EventError:
 				panic(event.Err)
 			}
 
 		default:
-			err := client.request_game()
+			err := client.requestGame()
 			if err != nil {
-				client.quit_game()
+				client.quitGame()
 				log.Println(err)
+				break loop
 			}
 			draw(&client.game)
 			time.Sleep(15 * time.Millisecond)
 		}
 	}
+
+	for {
+		select {
+		case event := <-eventQueue:
+			if event.Key == termbox.KeyCtrlQ {
+				break
+			}
+			break
+		default:
+			time.Sleep(15 * time.Millisecond)
+		}
+	}
+
 }

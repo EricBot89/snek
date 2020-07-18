@@ -5,33 +5,35 @@ import (
 	"time"
 )
 
+//Board the game board, holds food
 type Board struct {
-	Min_x  int
-	Min_y  int
-	Max_x  int
-	Max_y  int
+	MinX   int
+	MinY   int
+	MaxX   int
+	MaxY   int
 	Width  int
 	Height int
 	Food   [][2]int
 }
 
+//NewBoard makes a new board
 func NewBoard() Board {
 	return Board{
-		Min_x:  0,
-		Min_y:  0,
-		Max_x:  50,
-		Max_y:  25,
+		MinX:   0,
+		MinY:   0,
+		MaxX:   50,
+		MaxY:   25,
 		Width:  50,
 		Height: 25,
 	}
 }
 
-func (b *Board) remove_food(f_idx int) {
-	b.Food[f_idx] = b.Food[len(b.Food)-1]
+func (b *Board) removeFood(fIdx int) {
+	b.Food[fIdx] = b.Food[len(b.Food)-1]
 	b.Food = b.Food[:len(b.Food)-1]
 }
 
-func (b *Board) add_food() {
+func (b *Board) addFood() {
 	seed := time.Now().UnixNano()
 	rand.Seed(seed)
 	fx := rand.Intn(b.Width)

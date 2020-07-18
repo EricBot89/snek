@@ -12,13 +12,18 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
+//Endpoint TCP struct for handling resquest/response from client
 type Endpoint struct {
 	listner net.Listener
 	handler map[string]Handler
 
-	m sync.RWMutex //Maps are not threadsafe, so we need a mutex to control access.
+	m sync.RWMutex
 }
 
+//Handler handles incoming tcp requests
+type Handler func(*bufio.ReadWriter, *Game)
+
+//NewEndpoint endpoint constructor
 func NewEndpoint() *Endpoint {
 
 	return &Endpoint{
@@ -26,15 +31,17 @@ func NewEndpoint() *Endpoint {
 	}
 }
 
+//AddHandler adds a handler for a command
 func (e *Endpoint) AddHandler(name string, f Handler) {
-	e.m.Lock()          //Lock access to the endpoint to prevent race conditions? something else? check this out
-	e.handler[name] = f //Assign handler to the endpoint
-	e.m.Unlock()        //unlock access to the endpoint
+	e.m.Lock()
+	e.handler[name] = f
+	e.m.Unlock()
 }
 
+//Listen goroutine to start listning
 func (e *Endpoint) Listen(game *Game, port string) error {
 	var err error
-	e.listner, err = net.Listen("tcp", port) // again, look into udp for this
+	e.listner, err = net.Listen("tcp", port)
 	if err != nil {
 		return err
 	}
@@ -50,8 +57,8 @@ func (e *Endpoint) Listen(game *Game, port string) error {
 }
 
 func (e *Endpoint) handleTCP(conn net.Conn, game *Game) {
-	rw := bufio.NewReadWriter(bufio.NewReader(conn), bufio.NewWriter(conn)) //Grab a readwriter for this connection
-	defer conn.Close()                                                      //close the connection when we're all done
+	rw := bufio.NewReadWriter(bufio.NewReader(conn), bufio.NewWriter(conn))
+	defer conn.Close()
 	for {
 		cmd, err := rw.ReadString('\n')
 		if err != nil {
@@ -114,6 +121,10 @@ func handleSync(rw *bufio.ReadWriter, game *Game) {
 		_, writeErr := rw.WriteString("DEAD\n")
 		if writeErr != nil {
 			log.Println("Failed to write to steam", writeErr)
+		}
+		flushErr := rw.Flush()
+		if flushErr != nil {
+			log.Println("Flush failed.", flushErr)
 		}
 		return
 	}

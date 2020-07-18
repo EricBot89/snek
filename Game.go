@@ -1,11 +1,13 @@
 package main
 
 import (
+	"log"
 	"math/rand"
 	"sync"
 	"time"
 )
 
+//Game stuct for running snek
 type Game struct {
 	Sneks map[string]Snek
 	B     Board
@@ -13,11 +15,13 @@ type Game struct {
 	m sync.RWMutex
 }
 
+//GameData struct for sending game data over the wire
 type GameData struct {
 	Sneks []Snek
 	B     Board
 }
 
+//NewGameData returns a struct for the wire
 func NewGameData(g *Game) GameData {
 	var sneks []Snek
 	for _, Snek := range g.Sneks {
@@ -29,34 +33,37 @@ func NewGameData(g *Game) GameData {
 	}
 }
 
+//NewGame Game Constructor
 func NewGame() *Game {
+
 	g := Game{
 		B:     NewBoard(),
 		Sneks: map[string]Snek{},
 	}
-	g.B.add_food()
-	g.B.add_food()
+	g.B.addFood()
+	g.B.addFood()
 	return &g
 }
 
-func (g *Game) game_tick() {
+func (g *Game) gameTick() {
 	seed := time.Now().UnixNano()
 	rand.Seed(seed)
 	p := rand.Intn(1000)
 	g.m.Lock()
 	if p < 5 {
-		g.B.add_food()
+		g.B.addFood()
 	}
 	if len(g.B.Food) > 8 {
 		g.B.Food = g.B.Food[1:]
 	}
-	g.move_sneks()
-	g.check_food()
+	g.moveSneks()
+	g.checkFood()
+	g.checkLoss()
 	g.m.Unlock()
 }
 
-func (g *Game) move_sneks() {
-	for name, _ := range g.Sneks {
+func (g *Game) moveSneks() {
+	for name := range g.Sneks {
 		s := g.Sneks[name]
 		s.Tail = append(s.Tail, s.Head)
 		if len(s.Tail) > s.Len {
@@ -77,34 +84,36 @@ func (g *Game) move_sneks() {
 
 }
 
-func (g *Game) check_food() {
+func (g *Game) checkFood() {
 	for name, s := range g.Sneks {
-		for f_idx, cell := range g.B.Food {
+		for fIdx, cell := range g.B.Food {
 			if s.Head[0] == cell[0] && s.Head[1] == cell[1] {
 				s = g.Sneks[name]
-				s.eat_food()
-				g.B.remove_food(f_idx)
+				s.eatFood()
+				g.B.removeFood(fIdx)
 				g.Sneks[name] = s
 			}
 		}
 	}
 }
 
-func (g *Game) check_loss() {
-	for name, s := range g.Sneks {
+func (g *Game) checkLoss() {
+	for name := range g.Sneks {
+		s := g.Sneks[name]
 		for _, cell := range s.Tail {
 			if s.Head[0] == cell[0] && s.Head[1] == cell[1] {
-				s := g.Sneks[name]
 				s.Dead = true
-				g.Sneks[name] = s
+				log.Println(name + " Died!")
+				break
 			}
 		}
+		g.Sneks[name] = s
 	}
 }
 
-func (g *Game) run_snek() {
+func (g *Game) runSnek() {
 	for {
-		g.game_tick()
+		g.gameTick()
 		time.Sleep(100 * time.Millisecond)
 	}
 }

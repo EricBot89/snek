@@ -21,7 +21,7 @@ func main() {
 
 	if server {
 		s := NewServer(*port)
-		serverErr := s.serve_snek()
+		serverErr := s.serveSnek()
 		if serverErr != nil {
 			log.Println("Error:", serverErr)
 		}
@@ -30,11 +30,11 @@ func main() {
 	if multiplayer {
 		log.Println("should connect on", *ip)
 		c := NewClient(*name, *ip, *port)
-		clientErr := c.join_server()
+		clientErr := c.joinServer()
 		if clientErr != nil {
 			log.Println("Error:", clientErr)
 			return
 		}
-		c.play_snek()
+		c.playSnek()
 	}
 }
