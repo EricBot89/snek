@@ -48,7 +48,7 @@ func NewGame() *Game {
 func (g *Game) gameTick() {
 	seed := time.Now().UnixNano()
 	rand.Seed(seed)
-	p := rand.Intn(1000)
+	p := rand.Intn(100)
 	g.m.Lock()
 	if p < 5 {
 		g.B.addFood()
@@ -98,9 +98,16 @@ func (g *Game) checkFood() {
 }
 
 func (g *Game) checkLoss() {
+	var tailCells [][2]int
 	for name := range g.Sneks {
 		s := g.Sneks[name]
 		for _, cell := range s.Tail {
+			tailCells = append(tailCells, cell)
+		}
+	}
+	for name := range g.Sneks {
+		s := g.Sneks[name]
+		for _, cell := range tailCells {
 			if s.Head[0] == cell[0] && s.Head[1] == cell[1] {
 				s.Dead = true
 				log.Println(name + " Died!")

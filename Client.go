@@ -212,16 +212,4 @@ loop:
 		}
 	}
 
-	for {
-		select {
-		case event := <-eventQueue:
-			if event.Key == termbox.KeyCtrlQ {
-				break
-			}
-			break
-		default:
-			time.Sleep(15 * time.Millisecond)
-		}
-	}
-
 }
