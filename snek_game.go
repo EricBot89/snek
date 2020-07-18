@@ -28,13 +28,14 @@ func main() {
 	}
 
 	if multiplayer {
-		log.Println("should connect on", *ip)
+		log.Println("Connecting to snek server on ", *ip)
 		c := NewClient(*name, *ip, *port)
 		clientErr := c.joinServer()
 		if clientErr != nil {
 			log.Println("Error:", clientErr)
 			return
 		}
-		c.playSnek()
+		end := c.playSnek()
+		log.Println("Game Ended: " + end)
 	}
 }

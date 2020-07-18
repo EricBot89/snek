@@ -170,7 +170,7 @@ func Open(addr string) (*bufio.ReadWriter, error) {
 	return bufio.NewReadWriter(bufio.NewReader(conn), bufio.NewWriter(conn)), nil
 }
 
-func (client *SnekClient) playSnek() {
+func (client *SnekClient) playSnek() string {
 	err := termbox.Init()
 
 	termbox.Clear(termbox.ColorWhite, termbox.ColorBlack)
@@ -185,7 +185,6 @@ func (client *SnekClient) playSnek() {
 		}
 	}()
 
-loop:
 	for {
 		select {
 		case event := <-eventQueue:
@@ -193,7 +192,7 @@ loop:
 			case termbox.EventKey:
 				if event.Key == termbox.KeyCtrlQ {
 					client.quitGame()
-					break loop
+					return "You Quit"
 				}
 				client.sendKey(event)
 			case termbox.EventError:
@@ -205,7 +204,7 @@ loop:
 			if err != nil {
 				client.quitGame()
 				log.Println(err)
-				break loop
+				return "You Died"
 			}
 			draw(&client.game)
 			time.Sleep(15 * time.Millisecond)
