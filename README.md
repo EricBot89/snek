@@ -3,19 +3,15 @@ Multiplayer snake over tcp written in go
 
 ## usage
 
-Building Snek:
-
-    go get github.com/EricBot89/snek
-
 To start a server: 
 
-    snek_game -s 
+    go run github.com/EricBot89/snek -s 
     
 By default this serves on all ips on port 8080. To configure the port to serve on use the -p flag
 
 To start a client session: 
 
-    snek_game -c. 
+    go run github.com/EricBot89/snek -c. 
     
 By default this connects to localhost (127.0.0.1 on port 8080) with the name PLAYER. To configure player name use the -n flag, to configure the host ip use the -ip flag, to configure the host port use the -p flag.
 
