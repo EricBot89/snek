@@ -207,7 +207,7 @@ func (client *SnekClient) playSnek() string {
 				return "You Died"
 			}
 			draw(&client.game)
-			time.Sleep(15 * time.Millisecond)
+			time.Sleep(60 * time.Millisecond)
 		}
 	}
 
