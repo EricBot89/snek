@@ -176,7 +176,7 @@ func (client *SnekClient) playSnek() string {
 		case event := <-eventQueue:
 			switch event.Type {
 			case termbox.EventKey:
-				if event.Key == termbox.KeyCtrlQ {
+				if event.Key == termbox.KeyCtrlQ || event.Key == termbox.KeyCtrlC {
 					client.quitGame()
 					return "You Quit"
 				}
