@@ -21,7 +21,7 @@ type Endpoint struct {
 }
 
 //Handler handles incoming tcp requests
-type Handler func(*bufio.ReadWriter, *Game)
+type Handler func(*bufio.ReadWriter, *Game) bool
 
 //NewEndpoint endpoint constructor
 func NewEndpoint() *Endpoint {
@@ -52,6 +52,7 @@ func (e *Endpoint) Listen(game *Game, port string) error {
 			log.Println("Failed connection attempt:", err)
 			continue
 		}
+		//goroutine for handling each connection
 		go e.handleTCP(conn, game)
 	}
 }
@@ -76,11 +77,14 @@ func (e *Endpoint) handleTCP(conn net.Conn, game *Game) {
 			log.Println("Command '" + cmd + "' is not registered.")
 			return
 		}
-		handleCommand(rw, game)
+		done := handleCommand(rw, game)
+		if done {
+			return
+		}
 	}
 }
 
-func handleJoin(rw *bufio.ReadWriter, game *Game) {
+func handleJoin(rw *bufio.ReadWriter, game *Game) bool {
 	name, readErr := rw.ReadString('\n')
 	if readErr != nil {
 		log.Println("Failed to read string from stream", readErr)
@@ -95,7 +99,7 @@ func handleJoin(rw *bufio.ReadWriter, game *Game) {
 		if flushErr != nil {
 			log.Println("Flush failed.", flushErr)
 		}
-		return
+		return true
 	}
 	log.Println(name + " Joined Snek")
 	game.m.Lock()
@@ -109,9 +113,10 @@ func handleJoin(rw *bufio.ReadWriter, game *Game) {
 	if flushErr != nil {
 		log.Println("Flush failed.", flushErr)
 	}
+	return false
 }
 
-func handleSync(rw *bufio.ReadWriter, game *Game) {
+func handleSync(rw *bufio.ReadWriter, game *Game) bool {
 	name, readErr := rw.ReadString('\n')
 	if readErr != nil {
 		log.Println("Failed to read player name from stream", readErr)
@@ -126,7 +131,7 @@ func handleSync(rw *bufio.ReadWriter, game *Game) {
 		if flushErr != nil {
 			log.Println("Flush failed.", flushErr)
 		}
-		return
+		return false
 	}
 	_, writeErr := rw.WriteString("NOT DEAD\n")
 	if writeErr != nil {
@@ -144,9 +149,11 @@ func handleSync(rw *bufio.ReadWriter, game *Game) {
 	if flushErr != nil {
 		log.Println("Flush failed.", flushErr)
 	}
+
+	return false
 }
 
-func handleKey(rw *bufio.ReadWriter, game *Game) {
+func handleKey(rw *bufio.ReadWriter, game *Game) bool {
 	var keyPress termbox.Event
 
 	name, readErr := rw.ReadString('\n')
@@ -159,7 +166,7 @@ func handleKey(rw *bufio.ReadWriter, game *Game) {
 	err := dec.Decode(&keyPress)
 	if err != nil {
 		log.Println("unable to decode keypress")
-		return
+		return false
 	}
 
 	switch keyPress.Type {
@@ -168,11 +175,13 @@ func handleKey(rw *bufio.ReadWriter, game *Game) {
 		game.Sneks[name].chSnek(keyPress)
 		game.m.Unlock()
 	default:
-		return
+		return false
 	}
+
+	return false
 }
 
-func handleQuit(rw *bufio.ReadWriter, game *Game) {
+func handleQuit(rw *bufio.ReadWriter, game *Game) bool {
 	name, readErr := rw.ReadString('\n')
 	if readErr != nil {
 		log.Println("Failed to read player name from stream", readErr)
@@ -190,8 +199,11 @@ func handleQuit(rw *bufio.ReadWriter, game *Game) {
 	if flushErr != nil {
 		log.Println("Flush failed.", flushErr)
 	}
+
+	return true
 }
 
-func handleDC(rw *bufio.ReadWriter, game *Game) {
+func handleDC(rw *bufio.ReadWriter, game *Game) bool {
 	log.Println("client disconnected")
+	return true
 }
